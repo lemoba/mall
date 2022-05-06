@@ -101,10 +101,10 @@ class UserController extends BaseController
 
     /**
      * @PostMapping(path="logout")
-     * @Middleware()
+     * @Middleware(AuthMiddelware::class)
      */
     public function logout()
     {
-        return $this->failOrSuceess();
+        return $this->failOrSuceess($this->auth->logout());
     }
 }

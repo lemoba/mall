@@ -16,18 +16,14 @@ class BaseController extends AbstractController
 
     protected function codeReturn(array $codeResponse, $data = null, $info = '')
     {
-        [$code, $msg] = $codeResponse;
+        [$err_no, $err_msg] = $codeResponse;
 
-        $res = ['code' => $code, 'msg' => $info ?: $msg];
+        $res = ['code' => $err_no, 'msg' => $info ?: $err_msg];
 
         if (!is_null($data)) {
-            if (is_array($data)) {
-                $data = array_filter($data, function ($item) {
-                    return $item != null;
-                });
-            }
             $res['data'] = $data;
         }
+
         return $this->response->json($res);
     }
 
@@ -49,7 +45,7 @@ class BaseController extends AbstractController
     protected function failOrSuceess($isSuccess, array $codeResponse = CodeResponse::SUCCESS, $data = null, $info = '')
     {
         if ($isSuccess) {
-            return $this->success($codeResponse, $data);
+            return $this->success($data);
         } else {
             return $this->fail($codeResponse, $info);
         }
