@@ -9,11 +9,14 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 return [
     'handler' => [
         'http' => [
+            App\Exception\Handler\BusinessExceptionHandler::class,
             Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
             App\Exception\Handler\AppExceptionHandler::class,
+            \Qbhy\HyperfAuth\AuthExceptionHandler::class,
         ],
     ],
 ];
