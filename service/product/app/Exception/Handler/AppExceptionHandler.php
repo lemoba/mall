@@ -19,8 +19,14 @@ use Throwable;
 
 class AppExceptionHandler extends ExceptionHandler
 {
-    public function __construct(protected StdoutLoggerInterface $logger)
+    /**
+     * @var StdoutLoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(StdoutLoggerInterface $logger)
     {
+        $this->logger = $logger;
     }
 
     public function handle(Throwable $throwable, ResponseInterface $response)
