@@ -27,20 +27,6 @@ class BusinessExceptionHandler extends ExceptionHandler
                 ->withAddedHeader('content-type', 'application/json')
                 ->withBody(new SwooleStream($data));
         }
-
-        // if ($throwable instanceof JWTException) {
-        //     $data = json_encode([
-        //         'code' => 501,
-        //         'message' => '未登录',
-        //     ], JSON_UNESCAPED_UNICODE);
-        //
-        //     // 阻止异常冒泡
-        //     $this->stopPropagation();
-        //     return $response->withStatus(501)
-        //         ->withAddedHeader('content-type', 'application/json')
-        //         ->withBody(new SwooleStream($data));
-        // }
-
         return $response;
     }
 

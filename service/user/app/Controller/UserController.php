@@ -83,11 +83,10 @@ class UserController extends BaseController
 
         $token = $this->auth->login($user);
 
-        $res = [
+        return $this->success([
             'token' => $token,
             'userInfo' => $user
-        ];
-        return $this->success($res);
+        ]);
     }
 
     /**
