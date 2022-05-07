@@ -11,16 +11,22 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
+use App\Rpc\UserServicesInterface;
+use Hyperf\Di\Annotation\Inject;
+
 class IndexController extends AbstractController
 {
+    /**
+     * @Inject()
+     * @var UserServicesInterface
+     */
+    private $userService;
+
     public function index()
     {
-        $user = $this->request->input('user', 'Hyperf');
-        $method = $this->request->getMethod();
-
+        $res = $this->userService->userInfo(3);
         return [
-            'method' => $method,
-            'message' => "Hello {$user}.",
+            'message' => $res,
         ];
     }
 }
