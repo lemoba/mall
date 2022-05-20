@@ -4,16 +4,19 @@ namespace App\Controller;
 
 use App\Helper\CodeResponse;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Redis\RedisFactory;
+use Hyperf\Redis\Redis;
 use Hyperf\Validation\Contract\ValidatorFactoryInterface;
 
 class BaseController extends AbstractController
 {
-    /**
-     * @Inject()
-     * @var ValidatorFactoryInterface
-     */
-    protected $validator;
+    #[Inject]
+    protected ValidatorFactoryInterface $validator;
+
+    protected $redis;
+    public function __construct()
+    {
+        $this->redis = di()->get(Redis::class);
+    }
 
     protected function codeReturn(array $codeResponse, $data = null, $info = '')
     {

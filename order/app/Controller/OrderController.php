@@ -6,7 +6,6 @@ use App\Exception\BusinessException;
 use App\Helper\CodeResponse;
 use App\Rpc\ProductServicesInterface;
 use App\Service\OrderService;
-use App\Util\RedisLock;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\DeleteMapping;
@@ -14,27 +13,17 @@ use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PatchMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
-use Hyperf\Redis\RedisFactory;
 
-#[Controller(prefix: '/api/order')]
+#[Controller(prefix: '/api/v1')]
 class OrderController extends BaseController
 {
-
-    protected $redis;
-
-    public function __construct(RedisFactory $redisFactory)
-    {
-        $this->redis = $redisFactory->get('default');
-        parent::__construct();
-    }
-
     #[Inject]
     protected OrderService $orderService;
 
     #[Inject]
     protected ProductServicesInterface $productService;
 
-    #[GetMapping(path: 'list')]
+    #[GetMapping(path: 'orders')]
     public function index(RequestInterface $request)
     {
         $uid = $request->input('uid', 0);
@@ -46,7 +35,7 @@ class OrderController extends BaseController
         return $this->success($res);
     }
 
-    #[PostMapping(path: 'create')]
+    #[PostMapping(path: 'orders')]
     public function store(RequestInterface $request)
     {
         $input = $request->all();
@@ -63,26 +52,21 @@ class OrderController extends BaseController
 
         $product = $this->productService->detail((int)$input['pid']);
 
-        $redis = new RedisLock($this->redis, 'lock');
-
-        var_dump($redis->acquire());
-        // $res = $this->orderService->create($input);
-       return $this->success($product);
+        if (!$product) {
+            throw new BusinessException(CodeResponse::PARMA_VALUE_ILLEGAL, 'pid not exsists');
+        }
+       $res = $this->orderService->create($input);
+       return $this->failOrSuceess($res);
     }
 
-    #[GetMapping(path: 'detail')]
-    public function show(RequestInterface $request)
+    #[GetMapping(path: 'orders/{id:\d+}')]
+    public function show(int $id)
     {
-        $oid = $request->input('oid', 0);
-
-        if (!$oid) {
-            throw new BusinessException(CodeResponse::PARMA_VALUE_ILLEGAL, 'order id is required');
-        }
-        $info = $this->orderService->detail((int)$oid);
+        $info = $this->orderService->detail($id);
         return $this->success($info);
     }
 
-    #[PatchMapping(path: 'update')]
+    #[PatchMapping(path: 'orders')]
     public function update(RequestInterface $request)
     {
         $status = $request->input('status');
@@ -95,15 +79,10 @@ class OrderController extends BaseController
         return $this->failOrSuceess($res);
     }
 
-    #[DeleteMapping(path: 'delete')]
-    public function delete(RequestInterface $request)
+    #[DeleteMapping(path: 'orders/{id:\d+}')]
+    public function delete(int $id)
     {
-        $oid = $request->input('o_id');
-        if (!$oid) {
-            throw new BusinessException(CodeResponse::PARMA_VALUE_ILLEGAL, 'o_id is requied');
-        }
-        $res = $this->orderService->delete($oid);
-
+        $res = $this->orderService->delete($id);
         return $this->failOrSuceess($res);
     }
 }

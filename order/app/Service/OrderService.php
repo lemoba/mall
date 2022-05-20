@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Enum\OrderEnum;
+use App\Event\OrderCreated;
 use App\Exception\BusinessException;
 use App\Helper\CodeResponse;
 use App\Model\Order;
@@ -10,11 +12,11 @@ use Hyperf\Di\Annotation\Inject;
 
 class OrderService
 {
-    /**
-     * @Inject
-     * @var UserServicesInterface
-     */
-    private $userService;
+    #[Inject]
+    protected UserServicesInterface $userService;
+
+    #[Inject]
+    protected QueueService $queueService;
 
     public function list(int $uid, int $status = 0)
     {
@@ -31,22 +33,24 @@ class OrderService
         if (!$isUser) {
             throw new BusinessException(CodeResponse::AUTH_INVALID_ACCOUNT);
         }
-        return Order::query()->create($params);
+        $res = Order::query()->create($params);
+        $this->queueService->cancel($res->id, 10); // 投递异步任务 超时取消
+        return $res;
     }
 
-    public function detail(int $oid)
+    public function detail(int $id)
     {
-        return Order::query()->find($oid) ?? [];
+        return Order::query()->find($id) ?? [];
     }
 
-    public function update(int $oid, int $status)
+    public function update(int $id, int $status)
     {
-        return Order::find($oid)->update(['status' => $status]);
+        return Order::query()->where('id', $id)->update(['status' => $status]);
     }
 
-    public function delete(int $oid)
+    public function delete(int $id)
     {
-        return Order::find($oid)->delete();
+        return Order::query()->where('id', $id)->delete();
     }
 
     protected function isUser(int $uid): bool
@@ -54,5 +58,14 @@ class OrderService
         $user = $this->userService->userInfo($uid);
         if ($user) return true;
         return false;
+    }
+
+    public function delTimeoutOrder(int $id, int $status)
+    {
+        $order = Order::query()->find($id);
+        if ($order->status == OrderEnum::UNPAID) {
+            $order->status = OrderEnum::TIME_OUT;
+            $order->save();
+        }
     }
 }

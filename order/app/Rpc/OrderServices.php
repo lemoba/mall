@@ -2,20 +2,15 @@
 
 namespace App\Rpc;
 
-use App\Service\OrderService;
+use App\Service\PayService;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\RpcServer\Annotation\RpcService;
 
-/**
- * @RpcService(name="OrderServices", protocol="jsonrpc-http", server="jsonrpc-http", publishTo="consul")
- */
+#[RpcService(name: "OrderServices", protocol: "jsonrpc-http", server: "jsonrpc-http", publishTo: "consul")]
 class OrderServices implements OrderServicesInterface
 {
-    /**
-     * @Inject
-     * @var OrderService
-     */
-    protected $orderService;
+    #[Inject]
+    protected PayService $orderService;
 
     public function list(int $uid, int $status = 0)
     {
