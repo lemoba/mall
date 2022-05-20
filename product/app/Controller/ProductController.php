@@ -15,52 +15,30 @@ use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
-/**
- * @Controller(prefix="/api/product")
- */
+#[Controller(prefix: "/api/v1")]
 class ProductController extends BaseController
 {
-    /**
-     * @Inject
-     * @var ProductService
-     */
-    protected $productService;
+    #[Inject]
+    protected ProductService $productService;
 
+    #[Inject]
+    private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @Inject
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
-     * @GetMapping(path="list")
-     */
+    #[GetMapping(path: "product")]
     public function index()
     {
         $list = $this->productService->list();
         return $this->success($list);
     }
 
-    /**
-     * @GetMapping(path="detail")
-     */
-    public function show(RequestInterface $request)
+    #[GetMapping(path: "product/{id:\d+}")]
+    public function show(int $id)
     {
-        $pid = $request->input('id', 0);
-
-        if (!$pid) {
-            throw new BusinessException(CodeResponse::PARMA_VALUE_ILLEGAL, 'id is required');
-        }
-
-        $product = $this->productService->detail((int)$pid);
-
+        $product = $this->productService->detail($id);
         return $this->success($product);
     }
 
-    /**
-     * @PostMapping(path="create")
-     */
+    #[PostMapping(path: "product")]
     public function store(RequestInterface $request)
     {
         $params = $request->all();
@@ -85,9 +63,7 @@ class ProductController extends BaseController
         return $this->failOrSuceess($res);
     }
 
-    /**
-     * @PatchMapping(path="update")
-     */
+    #[PatchMapping(path: "product")]
     public function update(RequestInterface $request)
     {
         $params = $request->all();
@@ -100,16 +76,10 @@ class ProductController extends BaseController
         return $this->failOrSuceess($res);
     }
 
-    /**
-     * @DeleteMapping(path="delete")
-     */
-    public function delete(RequestInterface $request)
+    #[DeleteMapping(path: "product/{id: \d+}")]
+    public function delete(int $id)
     {
-        $pid = $request->input('pid', 0);
-        if (!$pid) {
-            throw new BusinessException(CodeResponse::PARMA_VALUE_ILLEGAL, 'pid is required');
-        }
-        $res = $this->productService->delete((int)$pid);
+        $res = $this->productService->delete($id);
         return $this->failOrSuceess($res);
     }
 }

@@ -8,32 +8,26 @@ use App\Exception\BusinessException;
 use App\Helper\CodeResponse;
 use App\Rpc\OrderServicesInterface;
 use App\Rpc\UserServicesInterface;
+use App\Service\PayService;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
 
-/**
- * @Controller(prefix="/api/pay")
- */
+#[Controller(prefix: "/api/v1")]
 class PayController extends BaseController
 {
-    /**
-     * @Inject
-     * @var UserServicesInterface
-     */
-    protected $userService;
+    #[Inject]
+    protected UserServicesInterface $userService;
 
-    /**
-     * @Inject
-     * @var OrderServicesInterface
-     */
-    protected $orderService;
+    #[Inject]
+    protected OrderServicesInterface $orderService;
 
-    /**
-     * @PostMapping(path="create")
-     */
+    #[Inject]
+    protected PayService $payService;
+
+    #[PostMapping(path: "pay")]
     public function create(RequestInterface $request)
     {
         $input = $request->all();
@@ -41,7 +35,7 @@ class PayController extends BaseController
         $validator = $this->validator->make($input, [
             'uid' => 'required',
             'oid' => 'required',
-            'amout' => 'required',
+            'amount' => 'required',
             'source' => 'required',
             'status' => 'required',
         ]);
@@ -62,22 +56,19 @@ class PayController extends BaseController
             throw new BusinessException(CodeResponse::PARMA_VALUE_ILLEGAL, '订单不存在');
         }
 
+        $res = $this->payService->store($input);
 
-        return $this->success($order);
+        return $this->failOrSuceess($res);
     }
 
-    /**
-     * @GetMapping(path="paymentCallBack")
-     */
+    #[GetMapping(path: "pay")]
     public function paymentCallBack()
     {
 
     }
 
-    /**
-     * @GetMapping("detail")
-     */
-    public function detail(RequestInterface $request)
+    #[GetMapping("pay/{id: \d+}")]
+    public function detail(int $id)
     {
 
     }

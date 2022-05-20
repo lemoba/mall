@@ -18,27 +18,16 @@ use Phper666\JWTAuth\JWT;
 use Phper666\JWTAuth\Middleware\JWTAuthDefaultSceneMiddleware;
 use Qbhy\HyperfAuth\AuthManager;
 
-/**
- * @Controller(prefix="/api/user")
- */
+#[Controller(prefix: "/api/v1/user")]
 class UserController extends BaseController
 {
+    #[Inject]
+    protected UserService $userService;
 
-    /**
-     * @Inject()
-     * @var UserService
-     */
-    protected $userService;
+    #[Inject]
+    protected AuthManager $auth;
 
-    /**
-     * @Inject()
-     * @var AuthManager
-     */
-    protected $auth;
-
-    /**
-     * @PostMapping(path="register")
-     */
+    #[PostMapping(path: "register")]
     public function register(RequestInterface $request)
     {
         $input = $request->all();
@@ -59,9 +48,7 @@ class UserController extends BaseController
         return $this->failOrSuceess($res);
     }
 
-    /**
-     * @PostMapping(path="login")
-     */
+    #[PostMapping(path: "login")]
     public function login(RequestInterface $request)
     {
         $mobile = $request->input('mobile');
@@ -89,19 +76,15 @@ class UserController extends BaseController
         ]);
     }
 
-    /**
-     * @GetMapping(path="userInfo")
-     * @Middleware(AuthMiddelware::class)
-     */
+    #[GetMapping(path: "userInfo")]
+    #[Middleware(AuthMiddelware::class)]
     public function userInfo()
     {
         return $this->success($this->auth->user());
     }
 
-    /**
-     * @PostMapping(path="logout")
-     * @Middleware(AuthMiddelware::class)
-     */
+    #[PostMapping(path: "logout")]
+    #[Middleware(AuthMiddelware::class)]
     public function logout()
     {
         return $this->failOrSuceess($this->auth->logout());

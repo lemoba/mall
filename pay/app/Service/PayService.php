@@ -16,6 +16,5 @@ class PayService
     {
         $res = Pay::query()->create($params);
         $this->eventDispatcher->dispatch(new PayCreated($res));
-        return $res;
     }
 }

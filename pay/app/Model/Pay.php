@@ -13,7 +13,13 @@ class Pay extends Model
      *
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        "uid",
+        "oid",
+        "amount",
+        "source",
+        "status"
+    ];
     /**
      * The attributes that should be cast to native types.
      *
